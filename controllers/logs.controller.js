@@ -105,8 +105,10 @@ export const getLogByUserIdAndDate = async (req, res) => {
   try {
     const { id, date } = req.params;
 
-    const startDate = new Date(`${date}T00:00:00.000Z`);
-    const endDate = new Date(`${date}T23:59:59.999Z`);
+    // Interpret the requested date in the user's local timezone,
+    // then convert that local-day range into UTC for the DynamoDB query.
+    const startDate = new Date(`${date}T00:00:00`);
+    const endDate = new Date(`${date}T23:59:59.999`);
 
     const logs = await Logs.query("userId")
       .using("userIdCreatedAtIndex")
@@ -115,7 +117,6 @@ export const getLogByUserIdAndDate = async (req, res) => {
       .between(startDate.toISOString(), endDate.toISOString())
       .exec();
 
-    // 🔥 Fix here
     const logsWithAgencyName = await Promise.all(
       logs.map(async (item) => {
         const agency = await Agency.get(item.agencyId);
