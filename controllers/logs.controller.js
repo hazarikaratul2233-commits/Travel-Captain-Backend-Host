@@ -81,8 +81,8 @@ export const getAllLogs = async (req, res) => {
     }
 };
 
-export const getLogByUserId = async (req, res) => {
-    try {
+export const  = async (req, res) => {
+    try {getLogByUserId
         const { id } = req.params;
 
         const logs = await Logs.scan("userId").eq(id).exec();
