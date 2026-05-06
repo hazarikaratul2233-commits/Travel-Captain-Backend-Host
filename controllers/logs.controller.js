@@ -12,7 +12,7 @@ export const createLogs = async (req, res) => {
                 message: "userId, location and type are required",
             });
         }
-
+        
         if (type === "Visit" && !req.file) {
             return res.status(400).json({
                 success: false,
