@@ -1,7 +1,8 @@
 import { uploadToS3 } from "../config/s3.js";
 import Agency from "../models/agency.model.js";
 import Logs from "../models/logs.model.js";
-
+import moment from "moment-timezone";
+        
 export const createLogs = async (req, res) => {
     try {
         const { userId, location, type, agencyId, remarks } = req.body;
@@ -103,10 +104,9 @@ export const getLogByUserId = async (req, res) => {
 
 export const getLogByUserIdAndDate = async (req, res) => {
   try {
+    const timezone = req.query.timezone || "UTC";
     const { id, date } = req.params;
 
-    // Interpret the requested date in the user's local timezone,
-    // then convert that local-day range into UTC for the DynamoDB query.
     const startDate = new Date(`${date}T00:00:00`);
     const endDate = new Date(`${date}T23:59:59.999`);
 
@@ -124,6 +124,10 @@ export const getLogByUserIdAndDate = async (req, res) => {
         return {
           ...item.toJSON(), // important for dynamoose
           agencyName: agency?.agencyName || null,
+
+          localTime: moment(item.createdAt)
+  .tz(timezone)
+  .format("hh:mm A")    
         };
       })
     );
