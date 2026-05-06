@@ -13,7 +13,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/", upload.single("image"), createLogs);
 router.get("/", getAllLogs);
-router.get("/:id", getLogByUserId);
 router.get("/:id/:date", getLogByUserIdAndDate);
+router.get("/:id", getLogByUserId);
 
 export default router;

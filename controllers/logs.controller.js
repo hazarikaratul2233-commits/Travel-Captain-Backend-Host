@@ -1,7 +1,8 @@
 import { uploadToS3 } from "../config/s3.js";
 import Agency from "../models/agency.model.js";
 import Logs from "../models/logs.model.js";
-
+import moment from "moment-timezone";
+        
 export const createLogs = async (req, res) => {
     try {
         const { userId, location, type, agencyId, remarks } = req.body;
@@ -80,8 +81,8 @@ export const getAllLogs = async (req, res) => {
     }
 };
 
-export const getLogByUserId = async (req, res) => {
-    try {
+export const  = async (req, res) => {
+    try {getLogByUserId
         const { id } = req.params;
 
         const logs = await Logs.scan("userId").eq(id).exec();
@@ -103,10 +104,12 @@ export const getLogByUserId = async (req, res) => {
 
 export const getLogByUserIdAndDate = async (req, res) => {
   try {
+    console.log("Timezone from frontend:", req.query.timezone);
+    const timezone = req.query.timezone || "Asia/Kolkata";
     const { id, date } = req.params;
 
-    const startDate = new Date(`${date}T00:00:00.000Z`);
-    const endDate = new Date(`${date}T23:59:59.999Z`);
+    const startDate = new Date(`${date}T00:00:00`);
+    const endDate = new Date(`${date}T23:59:59.999`);
 
     const logs = await Logs.query("userId")
       .using("userIdCreatedAtIndex")
@@ -115,7 +118,6 @@ export const getLogByUserIdAndDate = async (req, res) => {
       .between(startDate.toISOString(), endDate.toISOString())
       .exec();
 
-    // 🔥 Fix here
     const logsWithAgencyName = await Promise.all(
       logs.map(async (item) => {
         const agency = await Agency.get(item.agencyId);
@@ -123,6 +125,10 @@ export const getLogByUserIdAndDate = async (req, res) => {
         return {
           ...item.toJSON(), // important for dynamoose
           agencyName: agency?.agencyName || null,
+
+          localTime: moment(item.createdAt)
+  .tz(timezone)
+  .format("hh:mm A")    
         };
       })
     );
