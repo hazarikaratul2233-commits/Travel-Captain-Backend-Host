@@ -163,6 +163,17 @@ export const changePassword = async (req, res) => {
       });
     }
 
+    const isSamePassword = await bcrypt.compare(
+      newPassword,
+      user.password
+    );
+
+    if (isSamePassword) {
+      return res.status(400).json({
+        message: "New password cannot be same as current password",
+      });
+    }
+
     
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
